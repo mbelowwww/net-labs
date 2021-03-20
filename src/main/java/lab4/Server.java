@@ -1,10 +1,17 @@
 package lab4;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
+import java.util.UUID;
 
 public class Server implements Runnable {
+
+  String MESSAGE_SPLITTER = ":::";
+  String nameFolderForSaveFiles = "files_from_clients";
 
   ServerSocket serversocket;
   BufferedReader br1, br2;
@@ -25,7 +32,6 @@ public class Server implements Runnable {
       t2.start();
 
     } catch (Exception e) {
-      e.printStackTrace();
     }
   }
 
@@ -40,17 +46,51 @@ public class Server implements Runnable {
         } while (!in.equals("END"));
       } else {
         do {
-
-          byte[] bytes = socket.getInputStream().readAllBytes();
-          try (FileOutputStream fos = new FileOutputStream("pathname")) {
-            fos.write(bytes);
-          }
+          br2 = new BufferedReader(new InputStreamReader(socket.getInputStream()));
           out = br2.readLine();
-          System.out.println("Client says : : : " + out);
+          System.out.println(out);
+          createFileByMessageClient(out);
         } while (!out.equals("END"));
       }
     } catch (Exception e) {
+    }
+  }
+
+  private void createFileByMessageClient(String message){
+    String[] messages = message.split(MESSAGE_SPLITTER);
+
+    String filePath = createPathFile(messages[0]);
+    byte[] bytesFromMessage =  getFileBytesFromMessage(messages[1]);
+
+    try {
+      FileUtils.writeByteArrayToFile(new File(filePath), bytesFromMessage);
+    } catch (IOException e) {
       e.printStackTrace();
     }
   }
+
+  private String createPathFile(String fileName){
+    File file = new File(nameFolderForSaveFiles);
+    if (!file.exists()) {
+      file.mkdir();
+    }
+    return nameFolderForSaveFiles + "\\" + UUID.randomUUID().toString() + "."  + fileName;
+  }
+
+  private byte[] getFileBytesFromMessage(String messageName) {
+    String stringBytes = messageName
+        .replace("[", "")
+        .replace("]", "")
+        .replace(" ", "");
+
+    String[] aBytes = stringBytes.split(",");
+    byte[] bytes = new byte[aBytes.length];
+
+    for (int i = 0; i < aBytes.length; i++) {
+      bytes[i] = (byte) Integer.valueOf(aBytes[i]).intValue();
+    }
+
+    return bytes;
+  }
+
 }

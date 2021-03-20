@@ -1,9 +1,13 @@
 package lab4;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class Client implements Runnable {
 
@@ -11,7 +15,8 @@ public class Client implements Runnable {
   PrintWriter pr1;
   Socket socket;
   Thread t1, t2;
-  String in = "", out = "";
+  String out = "";
+  JFileChooser fileChooser = new JFileChooser();
 
   public Client() {
     try {
@@ -30,11 +35,15 @@ public class Client implements Runnable {
     try {
       if (Thread.currentThread() == t2) {
         do {
-          br1 = new BufferedReader(new InputStreamReader(System.in));
-          pr1 = new PrintWriter(socket.getOutputStream(), true);
-          in = br1.readLine();
-          pr1.println(in);
-        } while (!in.equals("END"));
+            br1 = new BufferedReader(new InputStreamReader(System.in));
+            pr1 = new PrintWriter(socket.getOutputStream(), true);
+
+          File file = fileChooser.getSelectedFile();
+          if (file != null) {
+            pr1.println(file.getName() + ":::" + Arrays.toString(FileUtils.readFileToByteArray(fileChooser.getSelectedFile())));
+            fileChooser.cleanSelectedFile();
+          }
+        } while (fileChooser != null);
       } else {
         do {
           br2 = new BufferedReader(new InputStreamReader(socket.getInputStream()));

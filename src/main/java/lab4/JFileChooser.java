@@ -1,8 +1,11 @@
 package lab4;
 
+import org.apache.commons.io.FileUtils;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 
 public class JFileChooser extends JFrame {
   private static final long serialVersionUID = 1L;
@@ -10,6 +13,7 @@ public class JFileChooser extends JFrame {
   private JButton btnFileFilter;
   private javax.swing.JFileChooser fileChooser;
   private JLabel label;
+  private File selectedFile = null;
 
   public JFileChooser() {
     super("Отправка файла на сервер");
@@ -52,10 +56,22 @@ public class JFileChooser extends JFrame {
         JOptionPane.showMessageDialog(JFileChooser.this,
             "Выбран файл ( " +
                 fileChooser.getSelectedFile() + " ),  отправка...");
-        File file = fileChooser.getSelectedFile();
+        selectedFile = fileChooser.getSelectedFile();
         label.setVisible(true);
         label.setText("Отправка...");
       }
     });
+  }
+
+  public File getSelectedFile() {
+    return selectedFile;
+  }
+
+  public void cleanSelectedFile() {
+    selectedFile = null;
+  }
+
+  public String getLabelText(){
+    return label.getText();
   }
 }
